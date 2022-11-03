@@ -20,47 +20,19 @@ Authors:
 
 ---
 
-## Quickstart
 
-We use torch hub to make model loading very easy -- no cloning of the repo needed!
-The steps to perform ASR inference with the trained checkpoint is simple:
-
-1. **Instal pip dependancies**: ensure `torch`, `torchaudio`, `numpy`, `omegaconf`, `fairseq`, `fastprogress`, `jiwer`, and `pandas` are installed (for full training dependencies see `requirements.txt`). Make sure you are using **python 3.10 or above**, this repo uses certain new features of python 3.10.
-2. **Load models**: load the trained TransFusion model and frozen WavLM encoder:
-  ```python
-  import torch
-  import torchaudio
-
-  device = 'cpu' # or 'cuda' if you have enough GPU memory.
-  wavlm = torch.hub.load('RF5/transfusion-asr', 'wavlm_large', device=device)
-  transfusion = torch.hub.load('RF5/transfusion-asr', 'transfusion_small_462k', device=device)
-  ```
-3. **Compute WavLM features**: load a 16kHz waveform and compute the WavLM features:
-
-  ```python
-  path = '<path to arbitrary 16kHz waveform>.wav'
-  x, sr = torchaudio.load(pth)
-  assert sr == 16000
-  # get weighted WavLM features:
-  features = wavlm.extract_transfusion_features(x.to(device), wavlm) # (seq_len, dim)
-  ```
-4. **Predict transcript**: Perform multinomial diffusion using all the additional techniques from the paper:
-
-  ```python
-  pred_inds, pred_text = transfusion.perform_simple_inference(
-      transfusion, # pass in model to use in diffusion
-      features[None],  # add batch dimension to features
-      transfusion.diffuser, # diffuser containing diffusion parameters
-      transfusion.vocab, # vocab for converting indices to text / text to indices
-      transfusion.cfg # model/diffusion config dict
-  )
-  print(pred_text)
-  # prints out the predicted transcript of your utterance!
-  ```
-
-That's it, trivial!
-You can modify the diffusion parameters using the `DSH` class in `transfusion/score.py` and in the diffuser config. By default it uses the optimal settings found in the paper. 
-
+## Install
+I know that it works at python=3.8 and cuda11.3，torch=1.12.1
+```
+1. create conda environmet
+conda create -n transfusion-asr python=3.8 -y
+conda activate transfusion-asr
+2. install transfusion-asr
+# set pip mirror source to tsinghua source, it can speed up download in China.
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/
+pip install torch==1.12.1+cu113  torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113
+pip install -r requirements.txt
+```
 
 ## Checkpoints
 
@@ -76,18 +48,7 @@ The performance on the Librispeech test set is summarized:
 | `transfusion_small_462k`   | 253 | 6.7 | 8.8 | 
 
 
-## Install
-I know that it works at python=3.8 and cuda11.3，torch=1.12.1
-```
-1. create conda environmet
-conda create -n transfusion-asr python=3.8 -y
-conda activate transfusion-asr
-2. install transfusion-asr
-# set pip mirror source to tsinghua source, it can speed up download in China.
-pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/
-pip install torch==1.12.1+cu113  torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113
-pip install -r requirements.txt
-```
+
 
 ## Training
 ### Preparing data
