@@ -75,17 +75,27 @@ The performance on the Librispeech test set is summarized:
 | ----------- | :----: | :-----------: | :----: | 
 | `transfusion_small_462k`   | 253 | 6.7 | 8.8 | 
 
+
+##Install
+I know that it works at python=3.8 and cuda11.3，torch=1.12.1
+```
+1. create conda environmet
+conda create -n transfusion-asr python=3.8 -y
+conda activate transfusion-asr
+2. install transfusion-asr
+# set pip mirror source to tsinghua source, it can speed up download in China.
+pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple/
+pip install torch==1.12.1+cu113  torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu113
+pip install -r requirements.txt
+```
+
 ## Training
-
-For training you must also install [`deepspeed`](https://www.deepspeed.ai/).
-
 ### Preparing data
-
 Before training, one needs to prepare the data. The steps to do that for the LibriSpeech dataset is:
 
 1. First download and extract the [LibriSpeech](http://www.openslr.org/12) dataset. 
 
-2. Then extract the WavLM features with the `extract.py` script:
+2. Then extract the WavLM features with the `extract.py` script and I add lilcom libriary to compress the wavlm feature, it can save disk space:
 
   ```
   usage: python -m wavlm.extract [--librispeech_path PATH/TO/LIBRESPEECH] [--ckpt_path PATH/TO/WAVLM_LARGE_CKPT] [--out_path PATH/TO/FEAT]
@@ -128,8 +138,10 @@ To train the model according to the paper specification, use the following deeps
 deepspeed --num_nodes 1 train.py train_csv=splits/train.csv valid_csv=splits/valid.csv  checkpoint_path=runs/pog-debug/ vocab_path=splits/vocab.pt batch_size=12  --deepspeed --deepspeed_config=deepspeed_cfg.json validation_interval=20000 checkpoint_interval=20000
 ```
 
-That's it! Now both logs and checkpoints will be saved into the `checkpoint_path` and the `output_path` specified in `deepspeed_cfg.json`.
+### whole prepare data and train model is write the bash shell(`run.sh`)
+if you using slurm environment, you can use `sbatch_run.sh` to prepare data, and use `sbatch_run_with_deepspeed.sh` to train model. 
 
+### inference
 You can get a detailed score of a trained checkpoint using the `transfusion/score.py` script (see its help message for usage), which is what is used to perform the final Librispeech evaluations. It contains all the special decoding strategies introduced in the paper as well as the main decoding hyperparameters.
 
 ### Repository structure:
