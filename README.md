@@ -76,7 +76,7 @@ The performance on the Librispeech test set is summarized:
 | `transfusion_small_462k`   | 253 | 6.7 | 8.8 | 
 
 
-##Install
+## Install
 I know that it works at python=3.8 and cuda11.3，torch=1.12.1
 ```
 1. create conda environmet
