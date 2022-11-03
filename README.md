@@ -131,6 +131,9 @@ The repository is organized as follows:
 ├── split_data.py                   # splits data into train/valid/test subsets
 ├── train.py                        # main training script
 └── TransFusion.png                 # TransFusion model
+├── run.sh                          # merge prepare data stage and train stage into one file,
+├── sbatch_run.sh                   # using slurm to run the run.sh at prepare data stage
+├── sbatch_run_with_deepspeed.sh    # using slurm to run the run.sh at training model stage
 ```
 
 
